@@ -4,6 +4,9 @@ import { sendToKafka } from "../services/producer.js";
 import { ObjectId } from "mongodb";
 
 const users = {};
+export const getReceiverSocketId = (receiverId) => {
+	return users[receiverId];
+};
 
 export function initSocket(io, db) {
   io.use((socket, next) => {

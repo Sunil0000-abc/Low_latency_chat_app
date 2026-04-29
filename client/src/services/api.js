@@ -38,11 +38,34 @@ export async function deleteConversation(conversationId) {
     },
     });
 
-    if (!res.ok) throw new Error("Delete failed");
+    const data = await res.json();
 
-    return true;
+    if (!res.ok) {
+      console.error("Delete API Error:", data); // 👈 SHOW BACKEND ERROR
+      throw new Error(data.error || "Delete failed");
+    }
+
+    return data;
   } catch (err) {
     console.error("deleteConversation error:", err);
+    return false;
+  }
+}
+
+export async function deleteMessage(messageId) {
+  try {
+    const res = await fetch(`${BASE}/conversations/message/${messageId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Delete failed");
+    return data;
+  } catch (err) {
+    console.error("deleteMessage error:", err);
     return false;
   }
 }

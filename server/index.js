@@ -23,6 +23,7 @@ async function start() {
       credentials: true
     }
   }); 
+  app.set("io", io);
 
   initSocket(io, db);
 

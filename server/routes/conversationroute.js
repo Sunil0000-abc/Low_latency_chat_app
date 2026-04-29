@@ -11,6 +11,7 @@ export default (db) => {
   router.get("/user", auth, controller.getUserConversations);
   router.get("/:id/messages", auth, controller.getMessages);
   router.delete("/:conversationId",auth,controller.deleteConversation)
+  router.delete("/message/:messageId", auth, controller.deleteMessage)
 
   return router;
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
-import { Check, CheckCheck, Download, FileText, File as FileIcon, Play, Pause } from "lucide-react";
+import { Check, CheckCheck, Download, FileText, File as FileIcon, Play, Pause, Trash2 } from "lucide-react";
 import { getDownloadUrl } from "../services/api";
 
 const CustomAudioPlayer = ({ src, isOwn }) => {
@@ -96,10 +96,58 @@ const CustomAudioPlayer = ({ src, isOwn }) => {
   );
 };
 
-export default function MessageBubble({ text, isOwn, time, status, fileData }) {
+export default function MessageBubble({ messageId, text, isOwn, time, status, fileData, onDeleteMessage }) {
   const formattedTime = time ? format(new Date(time), "HH:mm") : format(new Date(), "HH:mm");
   const [signedUrl, setSignedUrl] = useState(null);
   const [isFetchingUrl, setIsFetchingUrl] = useState(false);
+  const timerRef = useRef(null);
+
+  const [menu, setMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0
+  });
+
+  // Close menu on outside click
+  useEffect(() => {
+    const close = () => setMenu({ ...menu, visible: false });
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [menu]);
+
+  const openMenu = (e) => {
+    if (!isOwn || !messageId) return;
+    e.preventDefault();
+    setMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY
+    });
+  };
+
+  const handleTouchStart = (e) => {
+    if (!isOwn || !messageId) return;
+    const touch = e.touches[0];
+
+    timerRef.current = setTimeout(() => {
+      setMenu({
+        visible: true,
+        x: touch.clientX,
+        y: touch.clientY
+      });
+    }, 600); // long press
+  };
+
+  const handleTouchEnd = () => {
+    clearTimeout(timerRef.current);
+  };
+
+  const handleDelete = () => {
+    if (onDeleteMessage && messageId) {
+      onDeleteMessage(messageId);
+    }
+    setMenu({ visible: false, x: 0, y: 0 });
+  };
 
   useEffect(() => {
     if (fileData && (fileData.mimeType?.startsWith("image/") || fileData.mimeType?.startsWith("audio/"))) {
@@ -132,6 +180,9 @@ export default function MessageBubble({ text, isOwn, time, status, fileData }) {
   return (
     <div 
       className={`flex w-full ${isOwn ? "justify-end origin-bottom-right" : "justify-start origin-bottom-left"} mb-1 group animate-message-pop`}
+      onContextMenu={openMenu}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <div 
         className={`relative max-w-[85%] md:max-w-md px-3 pt-2 pb-6 rounded-lg text-[15px] shadow-sm
@@ -223,6 +274,25 @@ export default function MessageBubble({ text, isOwn, time, status, fileData }) {
           )}
         </div>
       </div>
+
+      {/* 🔥 Floating Delete Menu */}
+      {menu.visible && (
+        <div
+          style={{
+            top: menu.y,
+            left: menu.x
+          }}
+          className="fixed z-50 bg-[#202c33] rounded-lg shadow-lg border border-gray-700 min-w-[150px]"
+        >
+          <button
+            onClick={handleDelete}
+            className="flex items-center gap-2 w-full px-4 py-3 text-sm text-red-400 hover:bg-[#2a3942]"
+          >
+            <Trash2 size={16} />
+            Delete Message
+          </button>
+        </div>
+      )}
     </div>
   );
 }

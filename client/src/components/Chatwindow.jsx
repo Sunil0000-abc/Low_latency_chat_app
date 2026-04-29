@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import MessageBubble from "./MessageBubble";
 
-export default function ChatWindow({ messages, currentUserId, isTyping, currentChatId }) {
+export default function ChatWindow({ messages, currentUserId, isTyping, currentChatId, onDeleteMessage }) {
   const bottomRef = useRef(null);
   const isNearBottom = useRef(true);
 
@@ -38,12 +38,14 @@ export default function ChatWindow({ messages, currentUserId, isTyping, currentC
         )}
         {messages.map((m, i) => (
           <MessageBubble
-            key={i}
+            key={m._id || i}
+            messageId={m._id}
             text={m.text}
             status={m.status}
             isOwn={m.from === "me" || m.from === currentUserId}
             time={m.createdAt}
             fileData={m.fileData}
+            onDeleteMessage={onDeleteMessage}
           />
         ))}
 

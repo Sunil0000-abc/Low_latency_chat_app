@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { getReceiverSocketId } from "../sockets/socket.js";
 
 export default (db) => ({
   createOrGet: async (req, res) => {
@@ -136,7 +137,7 @@ export default (db) => ({
   
   deleteConversation: async (req,res)=>{
     try {
-      const convoId = req.params.id;
+      const convoId = req.params.conversationId;
       const userId = req.user._id || req.user.userId;
 
       const convo = await db.collection("conversations").findOne({
@@ -162,5 +163,38 @@ export default (db) => ({
       console.error(error);
       res.status(500).json({ error: "Failed to delete conversation" });
     }
+  },
+
+  deleteMessage: async (req,res) =>{
+      try {
+        const messageId = req.params.messageId;
+        const userId = req.user._id || req.user.userId;
+
+        const message = await db.collection("messages").findOne({
+          _id: new ObjectId(messageId)
+        });
+
+        if(!message) return res.status(404).json({error:"message not found"});
+
+        if(message.from !== userId){
+          return res.status(403).json({ error: "Not allowed" });
+        }
+
+        await db.collection("messages").deleteOne({
+          _id: new ObjectId(messageId)
+        });
+        
+        const receiverSocketId = getReceiverSocketId(message.to);
+        if (receiverSocketId) {
+          req.app.get("io").to(receiverSocketId).emit("messageDeleted",{
+            messageId,
+            conversationId: message.conversationId
+          });
+        }
+        res.json({message:"Message deleted"})
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to delete message" });
+      }
   }
 });

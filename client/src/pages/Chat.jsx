@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import useSocket from "../services/socket";
-import { getChats, searchUsers, createConversation, getMessages,deleteConversation } from "../services/api";
+import { getChats, searchUsers, createConversation, getMessages,deleteConversation, deleteMessage } from "../services/api";
 import Sidebar from "../components/Sidebar";
 import ChatWindow from "../components/ChatWindow";
 import MessageInput from "../components/MessageInput";
@@ -130,12 +130,27 @@ export default function Chat() {
       setMessages(prev => prev.map(m => m.conversationId === data.conversationId && m.status !== 'seen' ? { ...m, status: 'seen' } : m));
     };
 
+    const handleMessageDeleted = (data) => {
+      setMessages((prev) => prev.filter((m) => m._id !== data.messageId));
+      
+      // Update last message in chat list if needed
+      setChats(prevChats => prevChats.map(c => {
+        if (c._id === data.conversationId && c.lastMessage?._id === data.messageId) {
+          // If the last message was deleted, we ideally fetch the new last message,
+          // but for optimistic UI simplicity, we can just clear the text
+          return { ...c, lastMessage: { ...c.lastMessage, text: "Message deleted" } };
+        }
+        return c;
+      }));
+    };
+
     socket.on("receive_message", handleReceive);
     socket.on("user_presence", handlePresence);
     socket.on("typing", handleTyping);
     socket.on("stop_typing", handleStopTyping);
     socket.on("messages_delivered", handleMessagesDelivered);
     socket.on("messages_seen", handleMessagesSeen);
+    socket.on("messageDeleted", handleMessageDeleted);
 
     return () => {
       socket.off("receive_message", handleReceive);
@@ -144,6 +159,7 @@ export default function Chat() {
       socket.off("stop_typing", handleStopTyping);
       socket.off("messages_delivered", handleMessagesDelivered);
       socket.off("messages_seen", handleMessagesSeen);
+      socket.off("messageDeleted", handleMessageDeleted);
     };
   }, [socket, currentChat]);
 
@@ -196,6 +212,19 @@ export default function Chat() {
   await deleteConversation(conversationId);
   loadChats();
 };
+
+  const handleDeleteMessage = async (messageId) => {
+    // Optimistic UI
+    setMessages(prev => prev.filter(m => m._id !== messageId));
+    
+    // API call
+    const res = await deleteMessage(messageId);
+    if (!res && currentChat) {
+      // Rollback if failed (simple refetch)
+      const msgs = await getMessages(currentChat._id);
+      setMessages(msgs);
+    }
+  };
 
   const handleUserSelect = async (user) => {
     try {
@@ -318,7 +347,7 @@ export default function Chat() {
             </div>
 
             {/* Chat Window */}
-            <ChatWindow messages={messages} currentUserId={meObj._id} isTyping={isTyping} currentChatId={currentChat._id} />
+            <ChatWindow messages={messages} currentUserId={meObj._id} isTyping={isTyping} currentChatId={currentChat._id} onDeleteMessage={handleDeleteMessage} />
             {/* Input */}
             <MessageInput onSend={sendMessage} socket={socket} currentChat={currentChat} />
           </>
