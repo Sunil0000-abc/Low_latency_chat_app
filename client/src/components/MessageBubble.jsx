@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
-import { Check, CheckCheck, Download, FileText, File as FileIcon, Play, Pause, Trash2 } from "lucide-react";
+import { Check, CheckCheck, Download, FileText, File as FileIcon, Play, Pause } from "lucide-react";
+import ContextMenu from "./ContextMenu";
 import { getDownloadUrl } from "../services/api";
 
 const CustomAudioPlayer = ({ src, isOwn }) => {
@@ -107,13 +108,6 @@ export default function MessageBubble({ messageId, text, isOwn, time, status, fi
     x: 0,
     y: 0
   });
-
-  // Close menu on outside click
-  useEffect(() => {
-    const close = () => setMenu({ ...menu, visible: false });
-    window.addEventListener("click", close);
-    return () => window.removeEventListener("click", close);
-  }, [menu]);
 
   const openMenu = (e) => {
     if (!isOwn || !messageId) return;
@@ -275,24 +269,15 @@ export default function MessageBubble({ messageId, text, isOwn, time, status, fi
         </div>
       </div>
 
-      {/* 🔥 Floating Delete Menu */}
-      {menu.visible && (
-        <div
-          style={{
-            top: menu.y,
-            left: menu.x
-          }}
-          className="fixed z-50 bg-[#202c33] rounded-lg shadow-lg border border-gray-700 min-w-[150px]"
-        >
-          <button
-            onClick={handleDelete}
-            className="flex items-center gap-2 w-full px-4 py-3 text-sm text-red-400 hover:bg-[#2a3942]"
-          >
-            <Trash2 size={16} />
-            Delete Message
-          </button>
-        </div>
-      )}
+      {/* Floating Context Menu */}
+      <ContextMenu 
+        visible={menu.visible}
+        x={menu.x}
+        y={menu.y}
+        onClose={() => setMenu({ ...menu, visible: false })}
+        onDelete={handleDelete}
+        label="Delete Message"
+      />
     </div>
   );
 }

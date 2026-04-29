@@ -6,6 +6,7 @@ import ChatWindow from "../components/ChatWindow";
 import MessageInput from "../components/MessageInput";
 import SearchBar from "../components/SearchBar";
 import { LogOut, MessageSquare } from "lucide-react";
+import { encryptMessage, decryptMessage } from "../utils/encryption";
 import { useNavigate } from "react-router-dom";
 
 export default function Chat() {
@@ -39,6 +40,13 @@ export default function Chat() {
       const data = await getChats(currentSkip, 15);
       
       const safeData = Array.isArray(data) ? data : [];
+      
+      // Decrypt the lastMessage snippet for the sidebar
+      safeData.forEach(chat => {
+        if (chat.lastMessage && chat.lastMessage.text) {
+          chat.lastMessage.text = decryptMessage(chat.lastMessage.text);
+        }
+      });
 
       if (safeData.length < 15) {
         setHasMoreChats(false);
@@ -68,6 +76,11 @@ export default function Chat() {
     if (!socket) return;
     
     const handleReceive = (msg) => {
+      // Decrypt incoming message
+      if (msg.text) {
+        msg.text = decryptMessage(msg.text);
+      }
+      
       const clientReceivedAt = Date.now();
 
       if (msg.clientSentAt && msg.serverReceivedAt) {
@@ -179,6 +192,14 @@ export default function Chat() {
       else setMessages([]);
 
       const msgs = await getMessages(chat._id);
+      
+      // Decrypt loaded chat messages
+      msgs.forEach(m => {
+        if (m.text) {
+          m.text = decryptMessage(m.text);
+        }
+      });
+      
       setMessages(msgs);
       localStorage.setItem(`cache_messages_${chat._id}`, JSON.stringify(msgs));
       
@@ -245,14 +266,17 @@ export default function Chat() {
 
     const msg = {
       to: receiver,
-      text,
+      text: encryptMessage(text),
       conversationId: currentChat._id,
       clientSentAt: Date.now(),
       ...(fileData && { fileData })
     };
 
     socket.emit("send_message", msg);
-    const localMsg = { ...msg, from: "me", status: "sent", createdAt: new Date() };
+    console.log(msg);
+    
+    // Use plain text for the local UI optimistic update instead of encrypted text
+    const localMsg = { ...msg, text: text, from: "me", status: "sent", createdAt: new Date() };
     setMessages((prev) => [...prev, localMsg]);
 
     setChats(prevChats => {

@@ -1,6 +1,6 @@
 import { format } from "date-fns";
-import { useRef, useState, useEffect } from "react";
-import { Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
+import ContextMenu from "./ContextMenu";
 
 export default function Sidebar({
   chats,
@@ -20,13 +20,6 @@ export default function Sidebar({
     y: 0,
     conversationId: null
   });
-
-  // Close menu on outside click
-  useEffect(() => {
-    const close = () => setMenu({ ...menu, visible: false });
-    window.addEventListener("click", close);
-    return () => window.removeEventListener("click", close);
-  }, [menu]);
 
   const handleScroll = (e) => {
     const bottom =
@@ -132,24 +125,15 @@ export default function Sidebar({
         );
       })}
 
-      {/* 🔥 Floating Delete Menu */}
-      {menu.visible && (
-        <div
-          style={{
-            top: menu.y,
-            left: menu.x
-          }}
-          className="fixed z-50 bg-[#202c33] rounded-lg shadow-lg border border-gray-700 min-w-[150px]"
-        >
-          <button
-            onClick={handleDelete}
-            className="flex items-center gap-2 w-full px-4 py-3 text-sm text-red-400 hover:bg-[#2a3942]"
-          >
-            <Trash2 size={16} />
-            Delete Chat
-          </button>
-        </div>
-      )}
+      {/* Floating Context Menu */}
+      <ContextMenu 
+        visible={menu.visible}
+        x={menu.x}
+        y={menu.y}
+        onClose={() => setMenu({ ...menu, visible: false })}
+        onDelete={handleDelete}
+        label="Delete Chat"
+      />
 
       {isLoading && <p className="text-center text-sm">Loading...</p>}
     </div>
