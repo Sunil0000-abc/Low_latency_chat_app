@@ -1,0 +1,157 @@
+import { format } from "date-fns";
+import { useRef, useState, useEffect } from "react";
+import { Trash2 } from "lucide-react";
+
+export default function Sidebar({
+  chats,
+  onSelect,
+  currentChatId,
+  presenceUpdates,
+  onLoadMore,
+  hasMore,
+  isLoading,
+  onDeleteConversation
+}) {
+  const timerRef = useRef(null);
+
+  const [menu, setMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    conversationId: null
+  });
+
+  // Close menu on outside click
+  useEffect(() => {
+    const close = () => setMenu({ ...menu, visible: false });
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [menu]);
+
+  const handleScroll = (e) => {
+    const bottom =
+      e.target.scrollHeight - Math.ceil(e.target.scrollTop) <=
+      e.target.clientHeight + 5;
+
+    if (bottom && hasMore && !isLoading && onLoadMore) {
+      onLoadMore();
+    }
+  };
+
+  const openMenu = (e, conversationId) => {
+    e.preventDefault();
+
+    setMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      conversationId
+    });
+  };
+
+  const handleTouchStart = (e, id) => {
+    const touch = e.touches[0];
+
+    timerRef.current = setTimeout(() => {
+      setMenu({
+        visible: true,
+        x: touch.clientX,
+        y: touch.clientY,
+        conversationId: id
+      });
+    }, 600); // long press
+  };
+
+  const handleTouchEnd = () => {
+    clearTimeout(timerRef.current);
+  };
+
+  const handleDelete = () => {
+    if (!menu.conversationId) return;
+
+    onDeleteConversation(menu.conversationId);
+
+    setMenu({ visible: false, x: 0, y: 0, conversationId: null });
+  };
+
+  return (
+    <div
+      className="flex-1 overflow-y-auto no-scrollbar pb-4 relative"
+      onScroll={handleScroll}
+    >
+      {chats.map((c) => {
+        const isSelected = c._id === currentChatId;
+        const other = c.otherUser || { username: "Unknown" };
+
+        const presence = presenceUpdates[other._id];
+        const isOnline = presence ? presence.isOnline : other.isOnline;
+
+        return (
+          <div
+            key={c._id}
+            onClick={() => onSelect(c)}
+            onContextMenu={(e) => openMenu(e, c._id)}
+            onTouchStart={(e) => handleTouchStart(e, c._id)}
+            onTouchEnd={handleTouchEnd}
+            className={`flex items-center gap-3 px-3 py-3 mx-2 mt-1 rounded-xl cursor-pointer ${
+              isSelected ? "bg-[#2a3942]" : "hover:bg-[#202c33]"
+            }`}
+          >
+            {/* Avatar */}
+            <div className="relative w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center">
+              {other.avatar ? (
+                <img src={other.avatar} className="w-full h-full object-cover" />
+              ) : (
+                other.username[0]
+              )}
+            </div>
+
+            {/* Chat Info */}
+            <div className="flex-1">
+              <div className="flex justify-between">
+                <span>{other.username}</span>
+                <span className="text-xs">
+                  {c.lastMessage?.createdAt &&
+                    format(new Date(c.lastMessage.createdAt), "HH:mm")}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-400 truncate">
+                  {c.lastMessage?.text || "Start chatting"}
+                </span>
+
+                {c.unreadCount > 0 && (
+                  <span className="bg-green-500 text-white px-2 rounded-full text-xs">
+                    {c.unreadCount}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* 🔥 Floating Delete Menu */}
+      {menu.visible && (
+        <div
+          style={{
+            top: menu.y,
+            left: menu.x
+          }}
+          className="fixed z-50 bg-[#202c33] rounded-lg shadow-lg border border-gray-700 min-w-[150px]"
+        >
+          <button
+            onClick={handleDelete}
+            className="flex items-center gap-2 w-full px-4 py-3 text-sm text-red-400 hover:bg-[#2a3942]"
+          >
+            <Trash2 size={16} />
+            Delete Chat
+          </button>
+        </div>
+      )}
+
+      {isLoading && <p className="text-center text-sm">Loading...</p>}
+    </div>
+  );
+}
