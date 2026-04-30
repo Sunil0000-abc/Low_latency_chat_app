@@ -13,7 +13,7 @@ export default function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5001/api/auth/signup', { username, password, avatar });
+      const res = await axios.post('/api/auth/signup', { username, password, avatar });
       localStorage.setItem('token', res.data.token);
       window.dispatchEvent(new Event('storage'));
       navigate('/');

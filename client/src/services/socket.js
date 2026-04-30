@@ -5,7 +5,7 @@ export default function useSocket() {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const s = io("http://localhost:5001", {
+    const s = io("/", {
       auth: { token: localStorage.getItem("token") },
     });
 

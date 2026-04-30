@@ -1,4 +1,4 @@
-const BASE = "http://localhost:5001/api";
+const BASE = "/api";
 
 export const getToken = () => localStorage.getItem("token");
 

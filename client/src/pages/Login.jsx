@@ -12,7 +12,7 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5001/api/auth/login', { username, password });
+      const res = await axios.post('/api/auth/login', { username, password });
       localStorage.setItem('token', res.data.token);
       window.dispatchEvent(new Event('storage'));
       navigate('/');
