@@ -87,11 +87,11 @@ export default function Sidebar({
             onTouchStart={(e) => handleTouchStart(e, c._id)}
             onTouchEnd={handleTouchEnd}
             className={`flex items-center gap-3 px-3 py-3 mx-2 mt-1 rounded-xl cursor-pointer ${
-              isSelected ? "bg-[#2a3942]" : "hover:bg-[#202c33]"
+              isSelected ? "bg-[#3390ec1a]" : "hover:bg-gray-100"
             }`}
           >
             {/* Avatar */}
-            <div className="relative w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center">
+            <div className={`relative w-12 h-12 ${isSelected ? 'bg-[#3390ec]' : 'bg-gray-200'} rounded-full flex items-center justify-center ${isSelected ? 'text-white' : 'text-gray-600'} font-medium`}>
               {other.avatar ? (
                 <img src={other.avatar} className="w-full h-full object-cover" />
               ) : (
@@ -102,8 +102,8 @@ export default function Sidebar({
             {/* Chat Info */}
             <div className="flex-1">
               <div className="flex justify-between">
-                <span>{other.username}</span>
-                <span className="text-xs">
+                <span className={`font-semibold ${isSelected ? 'text-[#3390ec]' : 'text-[#222]'}`}>{other.username}</span>
+                <span className="text-[12px] text-gray-400">
                   {c.lastMessage?.createdAt &&
                     format(new Date(c.lastMessage.createdAt), "HH:mm")}
                 </span>
@@ -115,7 +115,7 @@ export default function Sidebar({
                 </span>
 
                 {c.unreadCount > 0 && (
-                  <span className="bg-green-500 text-white px-2 rounded-full text-xs">
+                  <span className="bg-[#3390ec] text-white px-2 rounded-full text-xs">
                     {c.unreadCount}
                   </span>
                 )}

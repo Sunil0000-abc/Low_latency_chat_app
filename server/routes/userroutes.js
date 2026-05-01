@@ -8,6 +8,7 @@ export default (db) => {
   const controller = userController(db);
 
   router.get("/search", auth, controller.searchUsers);
+  router.patch("/update-profile", auth, controller.updateProfile);
 
   return router;
 };

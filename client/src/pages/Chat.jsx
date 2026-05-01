@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import Logo from "../components/Logo";
 import useSocket from "../services/socket";
 import { getChats, searchUsers, createConversation, getMessages,deleteConversation, deleteMessage } from "../services/api";
 import Sidebar from "../components/Sidebar";
@@ -312,18 +313,18 @@ export default function Chat() {
   const meObj = localStorage.getItem('token') ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])) : {};
 
   return (
-    <div className="h-screen w-full flex bg-[#111b21] overflow-hidden text-white font-sans">
+    <div className="h-screen w-full flex bg-white overflow-hidden text-[#222] font-sans relative">
       {/* Sidebar Section */}
-      <div className={`md:flex flex-col w-full md:w-[350px] lg:w-[400px] bg-[#111b21] border-r border-[#202c33] transition-transform duration-300 ${isSidebarOpen ? "flex" : "hidden"} md:static absolute inset-y-0 left-0 z-10 shadow-2xl`}>
+      <div className={`flex flex-col w-full md:w-[320px] lg:w-[400px] bg-white border-r border-[#e6e6e6] transition-all duration-300 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} absolute md:relative inset-y-0 left-0 z-20 md:z-auto`}>
         {/* Profile Header */}
-        <div className="h-16 px-4 bg-[#202c33] flex items-center justify-between shadow-sm flex-shrink-0">
+        <div className="h-16 px-4 bg-white border-b border-[#e6e6e6] flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center text-white font-bold shadow-md uppercase overflow-hidden border border-indigo-400">
+            <div className="relative w-10 h-10 bg-[#3390ec] rounded-full flex items-center justify-center text-white font-bold shadow-sm uppercase overflow-hidden">
                {meObj.avatar ? <img src={meObj.avatar} className="w-full h-full object-cover" /> : meObj.username?.substring(0, 1)}
             </div>
-            <span className="font-semibold text-[15px] tracking-wide text-gray-200">Chats</span>
+            <span className="font-semibold text-[17px] tracking-tight text-[#222]">Chats</span>
           </div>
-          <button onClick={logout} className="p-2 text-gray-400 hover:text-red-400 transition-colors rounded-full hover:bg-[#2a3942]">
+          <button onClick={logout} className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-gray-100">
             <LogOut size={20} />
           </button>
         </div>
@@ -342,30 +343,30 @@ export default function Chat() {
       </div>
 
       {/* Main Chat Area */}
-      <div className={`flex-1 flex flex-col bg-[#0b141a] relative ${isSidebarOpen ? "hidden md:flex" : "flex"}`}>
+      <div className={`flex-1 flex flex-col bg-[#f4f4f5] relative ${isSidebarOpen ? "hidden md:flex" : "flex"}`}>
         {currentChat ? (
           <>
             {/* Chat Header */}
-            <div className="h-16 px-4 bg-[#202c33] flex items-center gap-4 shadow-sm flex-shrink-0 z-10 w-full relative">
+            <div className="h-16 px-3 md:px-4 bg-white border-b border-[#e6e6e6] flex items-center gap-3 md:gap-4 flex-shrink-0 z-10 w-full relative">
               <button 
-                className="md:hidden p-2 -ml-2 text-gray-400 hover:text-white"
+                className="md:hidden p-2 -ml-1 text-gray-400 hover:text-[#3390ec]"
                 onClick={() => setIsSidebarOpen(true)}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
               </button>
-              <div className="relative w-10 h-10 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center font-bold tracking-wide shadow-sm uppercase overflow-hidden border border-emerald-500/30">
+              <div className="relative w-9 h-9 md:w-10 md:h-10 bg-[#3390ec] text-white rounded-full flex items-center justify-center font-bold tracking-wide shadow-sm uppercase overflow-hidden flex-shrink-0">
                 {other.avatar ? (
                   <img src={other.avatar} alt={other.username} className="w-full h-full object-cover" />
                 ) : (
                   other.username.substring(0, 1)
                 )}
               </div>
-              <div className="flex flex-col">
-                <span className="font-semibold text-[15px] text-gray-100">{other.username}</span>
+              <div className="flex flex-col min-w-0">
+                <span className="font-semibold text-[15px] md:text-[16px] text-[#222] truncate">{other.username}</span>
                 {isOnline ? (
-                  <span className="text-xs text-emerald-500 font-medium tracking-wide">Online</span>
+                  <span className="text-[12px] md:text-[13px] text-[#3390ec] font-medium">Online</span>
                 ) : (
-                  <span className="text-xs text-gray-400">Offline</span>
+                  <span className="text-[12px] md:text-[13px] text-gray-400">Offline</span>
                 )}
               </div>
             </div>
@@ -376,12 +377,12 @@ export default function Chat() {
             <MessageInput onSend={sendMessage} socket={socket} currentChat={currentChat} />
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border-b-8 border-emerald-500">
-            <div className="w-32 h-32 mb-6 rounded-full bg-[#202c33] flex items-center justify-center">
-              <MessageSquare size={64} className="text-[#00a884] opacity-50" />
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+            <div className="mb-6 drop-shadow-xl opacity-80">
+              <Logo size={128} />
             </div>
-            <h2 className="text-3xl font-light text-gray-300 mb-4 tracking-wide">Low Latency Chat</h2>
-            <p className="text-gray-500 max-w-sm text-sm">Select a user from the sidebar or search for a new contact to start messaging.</p>
+            <h2 className="text-2xl font-semibold text-[#222] mb-3 tracking-tight">Select a Chat</h2>
+            <p className="text-gray-500 max-w-sm text-[15px]">Select a user from the sidebar or search for a new contact to start messaging.</p>
           </div>
         )}
       </div>

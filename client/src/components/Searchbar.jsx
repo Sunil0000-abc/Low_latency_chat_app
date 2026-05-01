@@ -31,14 +31,14 @@ export default function SearchBar({ onSelect }) {
   };
 
   return (
-    <div className="p-3 bg-[#111b21] border-b border-[#202c33] shrink-0">
-      <div className="relative flex items-center bg-[#202c33] rounded-lg">
+    <div className="p-3 bg-white border-b border-[#e6e6e6] shrink-0">
+      <div className="relative flex items-center bg-[#f4f4f5] rounded-xl flex-1 border border-transparent focus-within:border-[#3390ec] transition-all">
         <div className="pl-4 pr-2 text-gray-400">
           <Search size={18} />
         </div>
         <input
-          className="w-full bg-transparent p-2 text-[14px] outline-none text-gray-200 placeholder-gray-400"
-          placeholder="Search or start new chat"
+          className="w-full bg-transparent p-2 text-[15px] outline-none text-[#222] placeholder-gray-400"
+          placeholder="Search..."
           value={query}
           onChange={handleSearch}
         />
@@ -54,12 +54,12 @@ export default function SearchBar({ onSelect }) {
 
       {/* Search Dropdown / Results */}
       {query && (
-        <div className="absolute left-0 right-0 top-[110px] bottom-0 bg-[#111b21] z-20 overflow-y-auto w-full md:w-[inherit]">
+        <div className="absolute left-0 right-0 top-[110px] bottom-0 bg-white z-20 overflow-y-auto w-full md:w-[inherit]">
           {isSearching ? (
              <div className="p-8 text-center text-gray-400 text-sm">Searching...</div>
           ) : results.length > 0 ? (
             <div className="py-2">
-              <div className="px-4 py-2 text-[13px] text-emerald-500 font-semibold uppercase tracking-wide">Contacts</div>
+              <div className="px-4 py-2 text-[13px] text-[#3390ec] font-semibold uppercase tracking-wide">Contacts</div>
               {results.map((u) => (
                 <div 
                   key={u._id} 
@@ -67,9 +67,9 @@ export default function SearchBar({ onSelect }) {
                     onSelect(u);
                     clearSearch();
                   }}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-[#202c33] cursor-pointer transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 cursor-pointer transition-colors"
                 >
-                  <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center border border-emerald-500/30 overflow-hidden">
+                  <div className="w-10 h-10 bg-[#3390ec] text-white rounded-full flex items-center justify-center overflow-hidden">
                     {u.avatar ? (
                       <img src={u.avatar} className="w-full h-full object-cover" alt="" />
                     ) : (
@@ -77,8 +77,8 @@ export default function SearchBar({ onSelect }) {
                     )}
                   </div>
                   <div className="flex flex-col">
-                     <span className="text-gray-200 text-[15px]">{u.username}</span>
-                     {u.isOnline && <span className="text-[12px] text-emerald-500">Online</span>}
+                     <span className="text-[#222] text-[16px] font-medium">{u.username}</span>
+                     {u.isOnline && <span className="text-[13px] text-[#3390ec]">Online</span>}
                   </div>
                 </div>
               ))}

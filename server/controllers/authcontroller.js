@@ -5,21 +5,22 @@ import { generateToken } from "../utils/jwt.js";
 export default (db) => ({
   signup: async (req, res) => {
     try {
-      const { username, password, avatar } = req.body;
+      const { email, name, password, avatar } = req.body;
 
-      if (!username || !password) {
+      if (!email || !password || !name) {
         return res.status(400).json({ error: "Missing fields" });
       }
 
       // Explicitly check if the user already exists
-      const existingUser = await db.collection("users").findOne({ username });
+      const existingUser = await db.collection("users").findOne({ email });
       if (existingUser) {
-        return res.status(400).json({ error: "Username already exists" });
+        return res.status(400).json({ error: "Email already exists" });
       }
 
       const hash = await bcrypt.hash(password, 10);
       const result = await db.collection("users").insertOne({
-        username,
+        username: name,
+        email,
         password: hash,
         avatar: avatar || "",
         isOnline: false,
@@ -28,23 +29,58 @@ export default (db) => ({
         updatedAt: new Date()
       });
 
-      const token = generateToken({ _id: result.insertedId, username });
-      res.json({ token, user: { _id: result.insertedId, username } });
+      const token = generateToken({ _id: result.insertedId, username: name });
+      res.json({ token, user: { _id: result.insertedId, username: name, email } });
     } catch (error) {
       return res.status(500).json({ error: "Internal server error" });
     }
   },
 
   login: async (req, res) => {
-    const { username, password } = req.body;
+    try {
+      const { email, password } = req.body;
 
-    const user = await db.collection("users").findOne({ username });
-    if (!user) return res.status(400).json({ error: "User not found" });
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
 
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) return res.status(400).json({ error: "Invalid password" });
+      let user = await db.collection("users").findOne({ $or: [{ email }, { username: email }] });
 
-    const token = generateToken(user);
-    res.json({ token, user: { _id: user._id, username: user.username, avatar: user.avatar } });
+      if (!user) {
+        // Auto-signup logic
+        const hash = await bcrypt.hash(password, 10);
+        const result = await db.collection("users").insertOne({
+          username: email, // Temporary username, will be updated in next step
+          email,
+          password: hash,
+          avatar: "",
+          isOnline: false,
+          lastSeen: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+
+        const newUser = { _id: result.insertedId, username: email, email };
+        const token = generateToken(newUser);
+        return res.json({ 
+          token, 
+          user: newUser, 
+          isNewUser: true 
+        });
+      }
+
+      const ok = await bcrypt.compare(password, user.password);
+      if (!ok) return res.status(400).json({ error: "Invalid password" });
+
+      const token = generateToken(user);
+      res.json({ 
+        token, 
+        user: { _id: user._id, username: user.username, email: user.email, avatar: user.avatar }, 
+        isNewUser: false 
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
   },
 });

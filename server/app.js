@@ -10,7 +10,7 @@ import s3urlrouter from './routes/s3urlrouter.js'
 export function createApp(db) {
   const app = express();
   app.use(cors({
-    origin: "http:/3.7.58.95:5173",
+    origin: "*",
     credentials: true
   }));  
   app.use(express.json());

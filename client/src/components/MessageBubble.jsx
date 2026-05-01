@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { Check, CheckCheck, Download, FileText, File as FileIcon, Play, Pause } from "lucide-react";
-import ContextMenu from "./ContextMenu";
 import { getDownloadUrl } from "../services/api";
 
 const CustomAudioPlayer = ({ src, isOwn }) => {
@@ -59,7 +58,7 @@ const CustomAudioPlayer = ({ src, isOwn }) => {
       
       <button 
         onClick={togglePlay} 
-        className={`border-[2.5px] rounded-full p-[5px] flex-shrink-0 transition-transform active:scale-95 bg-transparent ${isOwn ? 'text-white border-white' : 'text-[#00a884] border-[#00a884]'}`}
+        className={`border-[2.5px] rounded-full p-[5px] flex-shrink-0 transition-transform active:scale-95 bg-transparent ${isOwn ? 'text-white border-white' : 'text-[#3390ec] border-[#3390ec]'}`}
       >
         {isPlaying ? <Pause fill="currentColor" size={14} /> : <Play fill="currentColor" size={14} className="ml-0.5" />}
       </button>
@@ -76,47 +75,37 @@ const CustomAudioPlayer = ({ src, isOwn }) => {
       >
         {bars.map((h, i) => {
            const isPlayed = (i / bars.length) <= progress;
-           return (
-             <div 
-               key={i} 
-               style={{ height: `${h}%` }} 
-               className={`w-[3px] rounded-full transition-colors duration-75 ${
-                 isPlayed 
-                   ? (isOwn ? 'bg-white' : 'bg-[#00a884]') 
-                   : (isOwn ? 'bg-white/40' : 'bg-gray-500')
-               }`}
-             />
-           );
+            return (
+              <div 
+                key={i} 
+                style={{ height: `${h}%` }} 
+                className={`w-[3px] rounded-full transition-colors duration-75 ${
+                  isPlayed 
+                    ? (isOwn ? 'bg-white' : 'bg-[#3390ec]') 
+                    : (isOwn ? 'bg-white/40' : 'bg-gray-500')
+                }`}
+              />
+            );
         })}
       </div>
       
-      <span className={`text-[13px] font-bold select-none flex-shrink-0 min-w-[30px] text-right ${isOwn ? 'text-white' : 'text-[#00a884]'}`} style={{ fontVariantNumeric: 'tabular-nums' }}>
+      <span className={`text-[13px] font-bold select-none flex-shrink-0 min-w-[30px] text-right ${isOwn ? 'text-white' : 'text-[#3390ec]'}`} style={{ fontVariantNumeric: 'tabular-nums' }}>
         {formatTime(currentTime > 0 ? currentTime : duration)}
       </span>
     </div>
   );
 };
 
-export default function MessageBubble({ messageId, text, isOwn, time, status, fileData, onDeleteMessage }) {
+export default function MessageBubble({ messageId, text, isOwn, time, status, fileData, onOpenMenu, isDeleting }) {
   const formattedTime = time ? format(new Date(time), "HH:mm") : format(new Date(), "HH:mm");
   const [signedUrl, setSignedUrl] = useState(null);
   const [isFetchingUrl, setIsFetchingUrl] = useState(false);
   const timerRef = useRef(null);
 
-  const [menu, setMenu] = useState({
-    visible: false,
-    x: 0,
-    y: 0
-  });
-
   const openMenu = (e) => {
     if (!isOwn || !messageId) return;
     e.preventDefault();
-    setMenu({
-      visible: true,
-      x: e.clientX,
-      y: e.clientY
-    });
+    onOpenMenu(e.clientX, e.clientY, messageId);
   };
 
   const handleTouchStart = (e) => {
@@ -124,23 +113,15 @@ export default function MessageBubble({ messageId, text, isOwn, time, status, fi
     const touch = e.touches[0];
 
     timerRef.current = setTimeout(() => {
-      setMenu({
-        visible: true,
-        x: touch.clientX,
-        y: touch.clientY
-      });
+      if (window.navigator?.vibrate) {
+        window.navigator.vibrate(50);
+      }
+      onOpenMenu(touch.clientX, touch.clientY, messageId);
     }, 600); // long press
   };
 
   const handleTouchEnd = () => {
     clearTimeout(timerRef.current);
-  };
-
-  const handleDelete = () => {
-    if (onDeleteMessage && messageId) {
-      onDeleteMessage(messageId);
-    }
-    setMenu({ visible: false, x: 0, y: 0 });
   };
 
   useEffect(() => {
@@ -173,19 +154,19 @@ export default function MessageBubble({ messageId, text, isOwn, time, status, fi
 
   return (
     <div 
-      className={`flex w-full ${isOwn ? "justify-end origin-bottom-right" : "justify-start origin-bottom-left"} mb-1 group animate-message-pop`}
+      className={`flex w-full ${isOwn ? "justify-end origin-bottom-right" : "justify-start origin-bottom-left"} mb-1 group ${isDeleting ? 'animate-message-exit' : 'animate-message-pop'}`}
       onContextMenu={openMenu}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       <div 
-        className={`relative max-w-[85%] md:max-w-md px-3 pt-2 pb-6 rounded-lg text-[15px] shadow-sm
+        className={`relative min-w-[70px] max-w-[85%] md:max-w-md px-3 pt-2 pb-6 rounded-lg text-[15px] shadow-sm
           ${isOwn 
-            ? "bg-[#005c4b] text-[#e9edef] rounded-tr-none" 
-            : "bg-[#202c33] text-[#e9edef] rounded-tl-none"
+            ? "bg-[#3390ec] text-white rounded-tr-none" 
+            : "bg-white text-[#222] rounded-tl-none"
           }`}
       >
-        <span className={`absolute top-0 w-3 h-3 ${isOwn ? "-right-2 text-[#005c4b]" : "-left-2 text-[#202c33]"}`}>
+        <span className={`absolute top-0 w-3 h-3 ${isOwn ? "-right-2 text-[#3390ec]" : "-left-2 text-white"}`}>
           {isOwn ? (
             <svg viewBox="0 0 8 13" width="8" height="13" fill="currentColor">
                <path d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z"></path>
@@ -227,7 +208,7 @@ export default function MessageBubble({ messageId, text, isOwn, time, status, fi
               </div>
             ) : (
               <div className="flex items-center gap-3 bg-black/20 p-3 rounded-lg w-full max-w-[300px] border border-gray-700/50">
-                <div className="bg-[#00a884] p-3 rounded-full flex-shrink-0">
+                <div className="bg-[#3390ec] p-3 rounded-full flex-shrink-0">
                   <FileText size={20} className="text-white" />
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col">
@@ -248,11 +229,12 @@ export default function MessageBubble({ messageId, text, isOwn, time, status, fi
         {text && (
           <p className="leading-snug break-words" style={{ wordBreak: 'break-word' }}>
             {text}
+            <span className="inline-block w-9 h-1" />
           </p>
         )}
 
         <div className="absolute right-2 bottom-1 flex items-center gap-1">
-          <span className="text-[11px] text-gray-300 drop-shadow-sm select-none">
+          <span className={`text-[11px] ${isOwn ? 'text-white/80' : 'text-gray-400'} select-none`}>
             {formattedTime}
           </span>
           {isOwn && (
@@ -269,15 +251,6 @@ export default function MessageBubble({ messageId, text, isOwn, time, status, fi
         </div>
       </div>
 
-      {/* Floating Context Menu */}
-      <ContextMenu 
-        visible={menu.visible}
-        x={menu.x}
-        y={menu.y}
-        onClose={() => setMenu({ ...menu, visible: false })}
-        onDelete={handleDelete}
-        label="Delete Message"
-      />
     </div>
   );
 }

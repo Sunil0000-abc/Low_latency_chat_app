@@ -40,3 +40,25 @@
 .animate-message-pop {
   animation: message-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
+
+@keyframes message-exit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    max-height: 500px;
+    margin-bottom: 4px;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85) translateX(20px);
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+.animate-message-exit {
+  animation: message-exit 0.3s ease-out forwards;
+  pointer-events: none;
+}

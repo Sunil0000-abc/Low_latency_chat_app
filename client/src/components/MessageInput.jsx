@@ -156,8 +156,9 @@ export default function MessageInput({ onSend, socket, currentChat }) {
   };
 
   return (
-    <div className="px-4 py-3 bg-[#202c33] flex items-center gap-3 z-10 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] flex-shrink-0">
-      <button 
+    <div className="px-4 py-3 bg-white border-t border-[#e6e6e6] z-10 flex-shrink-0">
+      <div className="max-w-3xl mx-auto flex items-center gap-2 md:gap-3">
+        <button 
         className={`transition-colors ${isRecording ? "text-[#f15c6d] animate-pulse" : "text-gray-400 hover:text-gray-200"}`}
         onMouseDown={startRecording}
         onMouseUp={stopRecording}
@@ -178,7 +179,7 @@ export default function MessageInput({ onSend, socket, currentChat }) {
         {isUploading ? <Loader size={24} className="animate-spin" /> : <Paperclip size={24} className="transform -rotate-45" />}
       </button>
 
-      <div className="flex-1 bg-[#2a3942] rounded-lg border border-[#202c33] focus-within:border-[#00a884] focus-within:bg-[#324550] transition-colors flex items-center min-h-[48px]">
+      <div className="flex-1 bg-[#f4f4f5] rounded-xl border border-transparent focus-within:border-[#3390ec] transition-all flex items-center min-h-[48px]">
         {isRecording ? (
           <div className="w-full flex items-center justify-between px-4 text-[#f15c6d]">
             <span className="flex items-center gap-2">
@@ -190,8 +191,8 @@ export default function MessageInput({ onSend, socket, currentChat }) {
         ) : (
           <input
             ref={inputRef}
-            className="w-full bg-transparent p-3 text-[15px] outline-none placeholder-gray-400"
-            placeholder="Type a message"
+            className="w-full bg-transparent p-3 text-[16px] outline-none text-[#222] placeholder-gray-400"
+            placeholder="Write a message..."
             value={text}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
@@ -206,12 +207,13 @@ export default function MessageInput({ onSend, socket, currentChat }) {
         disabled={!text.trim() || isUploading || isRecording}
         className={`p-3 rounded-full flex items-center justify-center transition-all ${
           text.trim() && !isRecording 
-            ? 'bg-[#00a884] hover:bg-[#008f6f] text-white shadow-md transform scale-100' 
+            ? 'bg-[#3390ec] hover:bg-[#2b80d4] text-white shadow-md transform scale-100' 
             : 'bg-transparent text-gray-500 scale-90'
         }`}
       >
         <Send size={20} className={text.trim() ? "ml-1" : ""} />
       </button>
+      </div>
     </div>
   );
 }
