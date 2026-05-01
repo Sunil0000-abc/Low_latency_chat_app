@@ -30,3 +30,19 @@ export const getDownloadUrl = async (key) => {
 
   return url;
 };
+
+export const getProfileUploadUrl = async (userId , fileType)=>{
+  const key = `profile/${userId}`;
+
+  const command = new PutObjectCommand({
+    Bucket: process.env.S3_BUCKET,
+    Key: key,
+    ContentType: fileType
+  })
+
+  const uploadUrl = await getSignedUrl(s3client,command,{expiresIn:300})
+
+  const fileUrl = `https://${process.env.S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+
+  return {uploadUrl,fileUrl}
+}

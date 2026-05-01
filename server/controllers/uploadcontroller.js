@@ -1,4 +1,4 @@
-import { getDownloadUrl, getUploadUrl } from "../services/tokengeneration.js";
+import { getDownloadUrl, getUploadUrl,getProfileUploadUrl } from "../services/tokengeneration.js";
 
 export const generateUploadUrl = async (req, res) => {
   try {
@@ -20,3 +20,16 @@ export const generateDownloadUrl = async (req, res) => {
     res.status(500).json({ error: "Failed to generate download URL" });
   }
 };
+
+export const generateProfileUploadUrl = async (req,res)=>{
+  try {
+    const userId = req.user._id;
+    const {fileType} = req.body;
+    
+    const data = await getProfileUploadUrl(userId,fileType);
+
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}

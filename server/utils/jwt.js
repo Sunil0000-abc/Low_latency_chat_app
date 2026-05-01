@@ -4,7 +4,8 @@ import 'dotenv/config'
 export const generateToken = (user)=>{
     return jwt.sign({
         _id: user._id,
-        username: user.username
+        username: user.username,
+        avatar: user.avatar
     }, process.env.JWT_SECRET, { expiresIn: "7d" });
 }
 

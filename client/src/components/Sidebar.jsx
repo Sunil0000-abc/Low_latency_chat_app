@@ -91,9 +91,9 @@ export default function Sidebar({
             }`}
           >
             {/* Avatar */}
-            <div className={`relative w-12 h-12 ${isSelected ? 'bg-[#3390ec]' : 'bg-gray-200'} rounded-full flex items-center justify-center ${isSelected ? 'text-white' : 'text-gray-600'} font-medium`}>
+            <div className={`relative w-12 h-12 ${isSelected ? 'bg-[#3390ec]' : 'bg-gray-200'} rounded-full flex items-center justify-center ${isSelected ? 'text-white' : 'text-gray-600'} font-medium overflow-hidden`}>
               {other.avatar ? (
-                <img src={other.avatar} className="w-full h-full object-cover" />
+                <img src={other.avatar} className="w-full h-full object-cover rounded-full" />
               ) : (
                 other.username[0]
               )}

@@ -71,7 +71,7 @@ export default function SearchBar({ onSelect }) {
                 >
                   <div className="w-10 h-10 bg-[#3390ec] text-white rounded-full flex items-center justify-center overflow-hidden">
                     {u.avatar ? (
-                      <img src={u.avatar} className="w-full h-full object-cover" alt="" />
+                      <img src={u.avatar} className="w-full h-full object-cover rounded-full" alt="" />
                     ) : (
                       u.username.substring(0, 1).toUpperCase()
                     )}

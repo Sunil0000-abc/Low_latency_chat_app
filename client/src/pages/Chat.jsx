@@ -89,6 +89,10 @@ export default function Chat() {
             const clientToServer = msg.serverReceivedAt - msg.clientSentAt;
             const serverToClient = clientReceivedAt - msg.serverReceivedAt;
 
+            console.log("📡 Total:", totalLatency, "ms");
+            console.log("📡 Client to Server:", clientToServer, "ms");
+            console.log("📡 Server to Client:", serverToClient, "ms");
+
             // console.log("📡 Total:", totalLatency, "ms");
         }
       setMessages((prev) => [...prev, msg]);
@@ -320,7 +324,7 @@ export default function Chat() {
         <div className="h-16 px-4 bg-white border-b border-[#e6e6e6] flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="relative w-10 h-10 bg-[#3390ec] rounded-full flex items-center justify-center text-white font-bold shadow-sm uppercase overflow-hidden">
-               {meObj.avatar ? <img src={meObj.avatar} className="w-full h-full object-cover" /> : meObj.username?.substring(0, 1)}
+               {meObj.avatar ? <img src={meObj.avatar} className="w-full h-full object-cover rounded-full" /> : meObj.username?.substring(0, 1)}
             </div>
             <span className="font-semibold text-[17px] tracking-tight text-[#222]">Chats</span>
           </div>
@@ -356,7 +360,7 @@ export default function Chat() {
               </button>
               <div className="relative w-9 h-9 md:w-10 md:h-10 bg-[#3390ec] text-white rounded-full flex items-center justify-center font-bold tracking-wide shadow-sm uppercase overflow-hidden flex-shrink-0">
                 {other.avatar ? (
-                  <img src={other.avatar} alt={other.username} className="w-full h-full object-cover" />
+                  <img src={other.avatar} alt={other.username} className="w-full h-full object-cover rounded-full" />
                 ) : (
                   other.username.substring(0, 1)
                 )}

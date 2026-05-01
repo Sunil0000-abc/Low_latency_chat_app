@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Logo from '../components/Logo';
+import { uploadProfileImage } from '../services/api';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,7 +10,18 @@ export default function Login() {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [isNewUserStep, setIsNewUserStep] = useState(false);
+  const [profileFile, setProfileFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const fileInputRef = useRef(null);
   const navigate = useNavigate();
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,10 +42,20 @@ export default function Login() {
       } else {
         // Step 2: Collected name for new user
         const token = localStorage.getItem('token');
-        await axios.patch('/api/user/update-profile', 
-          { username: name },
+        let avatar = null;
+
+        if (profileFile) {
+          avatar = await uploadProfileImage(profileFile);
+        }
+
+        const resUpdate = await axios.patch('/api/user/update-profile', 
+          { username: name, avatar },
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        
+        if (resUpdate.data.token) {
+          localStorage.setItem('token', resUpdate.data.token);
+        }
         window.dispatchEvent(new Event('storage'));
         navigate('/');
       }
@@ -97,19 +119,52 @@ export default function Login() {
               </div>
             </>
           ) : (
-            <div className="animate-in fade-in zoom-in duration-300 relative">
-              <input
-                type="text"
-                required
-                className="w-full h-[54px] px-4 pt-4 pb-1 border border-[#dfe1e5] rounded-xl text-[16px] text-black focus:border-[#3390ec] focus:ring-2 focus:ring-[#3390ec] focus:outline-none transition-all peer bg-transparent"
-                placeholder=" "
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoFocus
-              />
-              <label className={`absolute left-4 transition-all duration-200 pointer-events-none text-[#a2a6aa] ${name ? 'top-1.5 text-[12px]' : 'top-4 text-[16px]'} peer-focus:top-1.5 peer-focus:text-[12px] peer-focus:text-[#3390ec]`}>
-                Display Name
-              </label>
+            <div className="animate-in fade-in zoom-in duration-300 flex flex-col items-center gap-6">
+              {/* Profile Picture Upload */}
+              <div 
+                className="relative group cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <div className="w-24 h-24 rounded-full border-2 border-dashed border-[#dfe1e5] group-hover:border-[#3390ec] overflow-hidden flex items-center justify-center transition-all bg-[#f4f4f5]">
+                  {previewUrl ? (
+                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    <div className="flex flex-col items-center text-[#707579]">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div className="absolute bottom-0 right-0 bg-[#3390ec] text-white p-1.5 rounded-full shadow-lg transform group-hover:scale-110 transition-transform">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={handleFileChange} 
+                />
+              </div>
+
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  required
+                  className="w-full h-[54px] px-4 pt-4 pb-1 border border-[#dfe1e5] rounded-xl text-[16px] text-black focus:border-[#3390ec] focus:ring-2 focus:ring-[#3390ec] focus:outline-none transition-all peer bg-transparent"
+                  placeholder=" "
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  autoFocus
+                />
+                <label className={`absolute left-4 transition-all duration-200 pointer-events-none text-[#a2a6aa] ${name ? 'top-1.5 text-[12px]' : 'top-4 text-[16px]'} peer-focus:top-1.5 peer-focus:text-[12px] peer-focus:text-[#3390ec]`}>
+                  Display Name
+                </label>
+              </div>
             </div>
           )}
 

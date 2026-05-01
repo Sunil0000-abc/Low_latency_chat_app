@@ -1,3 +1,4 @@
+import { imageCompresser } from "../utils/compress";
 const BASE = "/api";
 
 export const getToken = () => localStorage.getItem("token");
@@ -108,4 +109,37 @@ export async function uploadFileToS3(uploadUrl, file) {
   });
   if (!res.ok) throw new Error("Failed to upload file to S3");
   return true;
+}
+
+export async function updateProfile(data) {
+  const res = await fetch(`${BASE}/user/update-profile`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
+export async function uploadProfileImage(file) {
+  // 1. get upload URL
+  const compressedfile = await imageCompresser(file);
+  const res = await fetch(`${BASE}/files/profile-upload-url`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify({ fileType: compressedfile.type }),
+  });
+
+  const { uploadUrl, fileUrl } = await res.json();
+
+  // 2. upload to S3
+  await uploadFileToS3(uploadUrl, compressedfile);
+
+  // 3. update profile in DB (optional here, as we can call updateProfile from the component)
+  return fileUrl;
 }

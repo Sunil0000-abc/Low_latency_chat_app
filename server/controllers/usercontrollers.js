@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { generateToken } from "../utils/jwt.js";
 
 export default (db) => ({
   searchUsers: async (req, res) => {
@@ -18,23 +19,32 @@ export default (db) => ({
 
   updateProfile: async (req, res) => {
     try {
-      const { username } = req.body;
+      const { username ,avatar  } = req.body;
       if (!username) {
         return res.status(400).json({ error: "Username is required" });
       }
 
       const userId = req.user._id;
+
+      const updateFields = {};
+
+     if (username) updateFields.username = username;
+     if (avatar) updateFields.avatar = avatar;
+
+     updateFields.updatedAt = new Date();
+
+
       await db.collection("users").updateOne(
         { _id: new ObjectId(userId) },
         { 
-          $set: { 
-            username,
-            updatedAt: new Date()
-          } 
-        }
+          $set:updateFields
+        } 
       );
 
-      res.json({ success: true, username });
+      const updatedUser = await db.collection("users").findOne({ _id: new ObjectId(userId) });
+      const token = generateToken(updatedUser);
+
+      res.json({ success: true, token, user: updatedUser });
     } catch (error) {
       console.error("Update profile error:", error);
       res.status(500).json({ error: "Failed to update profile" });
