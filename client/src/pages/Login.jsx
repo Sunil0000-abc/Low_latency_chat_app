@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Loader2 } from 'lucide-react';
 import Logo from '../components/Logo';
 import { uploadProfileImage } from '../services/api';
 
@@ -13,6 +14,7 @@ export default function Login() {
   const [profileFile, setProfileFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
@@ -26,6 +28,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
       if (!isNewUserStep) {
         // Step 1: Login or Auto-register
@@ -62,11 +65,13 @@ export default function Login() {
     } catch (err) {
       const msg = err.response?.data?.error || 'Authentication failed. Check your credentials.';
       setError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center bg-white min-h-screen z-50 absolute inset-0 w-full px-4">
+    <div className="flex-1 flex flex-col items-center justify-center bg-white h-full z-50 absolute inset-0 w-full px-4">
       <div className="w-full max-w-[400px] p-8 bg-white flex flex-col items-center">
         
         {/* Logo */}
@@ -170,9 +175,14 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full h-[54px] bg-[#3390ec] hover:bg-[#2b80d4] text-white rounded-xl font-medium text-[16px] transition-colors mt-4 uppercase tracking-wide shadow-sm"
+            disabled={loading}
+            className="w-full h-[54px] bg-[#3390ec] hover:bg-[#2b80d4] disabled:bg-[#3390ec]/60 disabled:cursor-not-allowed text-white rounded-xl font-medium text-[16px] transition-colors mt-4 uppercase tracking-wide shadow-sm flex items-center justify-center gap-2"
           >
-            NEXT
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              "NEXT"
+            )}
           </button>
         </form>
       </div>

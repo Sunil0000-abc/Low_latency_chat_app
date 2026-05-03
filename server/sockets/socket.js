@@ -1,4 +1,4 @@
-// src/sockets/socket.js
+
 import { verifyToken } from "../utils/jwt.js";
 import { sendToKafka } from "../services/producer.js";
 import { ObjectId } from "mongodb";
@@ -20,7 +20,7 @@ export function initSocket(io, db) {
   });
 
   io.on("connection", async (socket) => {
-    // Determine the user's ID
+    // Finding the user's ID
     const userId = socket.user._id || socket.user.userId;
     users[userId] = socket.id;
 

@@ -93,7 +93,7 @@ export default function Chat() {
             console.log("📡 Client to Server:", clientToServer, "ms");
             console.log("📡 Server to Client:", serverToClient, "ms");
 
-            // console.log("📡 Total:", totalLatency, "ms");
+           
         }
       setMessages((prev) => [...prev, msg]);
       
@@ -317,7 +317,7 @@ export default function Chat() {
   const meObj = localStorage.getItem('token') ? JSON.parse(atob(localStorage.getItem('token').split('.')[1])) : {};
 
   return (
-    <div className="h-screen w-full flex bg-white overflow-hidden text-[#222] font-sans relative">
+    <div className="h-full w-full flex bg-white overflow-hidden text-[#222] font-sans relative">
       {/* Sidebar Section */}
       <div className={`flex flex-col w-full md:w-[320px] lg:w-[400px] bg-white border-r border-[#e6e6e6] transition-all duration-300 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"} absolute md:relative inset-y-0 left-0 z-20 md:z-auto`}>
         {/* Profile Header */}

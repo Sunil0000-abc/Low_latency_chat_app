@@ -1,4 +1,4 @@
-// src/services/producer.js
+
 import { kafka } from "../config/kafka.js";
 
 const producer = kafka.producer();

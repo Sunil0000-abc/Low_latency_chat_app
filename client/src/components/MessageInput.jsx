@@ -156,7 +156,7 @@ export default function MessageInput({ onSend, socket, currentChat }) {
   };
 
   return (
-    <div className="px-4 py-3 bg-white border-t border-[#e6e6e6] z-10 flex-shrink-0">
+    <div className="px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] bg-white border-t border-[#e6e6e6] z-10 flex-shrink-0">
       <div className="max-w-3xl mx-auto flex items-center gap-2 md:gap-3">
         <button 
         className={`transition-colors ${isRecording ? "text-[#f15c6d] animate-pulse" : "text-gray-400 hover:text-gray-200"}`}

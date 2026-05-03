@@ -1,5 +1,3 @@
-// src/services/consumer.js
-
 import { kafka } from "../config/kafka.js";
 import { connectDB } from "../config/db.js";
 
@@ -14,7 +12,7 @@ export async function startConsumer() {
     eachMessage: async ({ message }) => {
       const data = JSON.parse(message.value.toString());
 
-      // ✅ 1. Store message
+      //  Store message
       const dbStart = Date.now();
       await db.collection("messages").insertOne({
         ...data,
@@ -26,7 +24,7 @@ export async function startConsumer() {
 
       console.log("🗄️ DB Latency:", dbLatency, "ms");
 
-      // ✅ 2. UPDATE CONVERSATION HERE (THIS IS YOUR CODE)
+      //  UPDATE CONVERSATION HERE (THIS IS YOUR CODE)
       await db.collection("conversations").updateOne(
         { _id: data.conversationId },
         {

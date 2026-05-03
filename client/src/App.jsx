@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children }) => {
 
 export default function App() {
   return (
-    <div className="h-screen flex bg-gradient-to-br from-[#0c1317] to-[#111b21] text-white">
+    <div className="h-[100dvh] w-full flex flex-col bg-gradient-to-br from-[#0c1317] to-[#111b21] text-white overflow-hidden">
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route 
